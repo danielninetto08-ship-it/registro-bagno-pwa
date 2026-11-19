@@ -1,0 +1,9 @@
+REGISTRO BAGNO - app installabile (PWA)
+
+1. Carica questa cartella su un hosting gratuito (es. Netlify Drop, GitHub Pages, Cloudflare Pages).
+2. Apri l'indirizzo che ottieni, poi installa:
+   - iPhone/iPad (Safari): Condividi > Aggiungi a schermata Home
+   - Android (Chrome): menu > Installa app
+   - Windows/Mac/Linux (Chrome o Edge): icona "Installa" nella barra dell'indirizzo
+   - Mac (Safari): File > Aggiungi al Dock
+3. Dopo la prima apertura funziona anche senza internet.

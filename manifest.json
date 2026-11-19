@@ -1,0 +1,25 @@
+{
+  "name": "Registro Bagno",
+  "short_name": "Registro Bagno",
+  "description": "Prenotazione uscite al bagno con timer di 6 minuti",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "lang": "it",
+  "background_color": "#f2f4f7",
+  "theme_color": "#1f4fd8",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
