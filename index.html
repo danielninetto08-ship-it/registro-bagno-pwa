@@ -128,6 +128,7 @@
     <section class="panel">
       <h2>Storico</h2>
       <ul id="storico"></ul>
+      <button id="btn-reset" class="secondario" type="button">Azzera uscite e storico</button>
     </section>
   </div>
 </div>
@@ -305,6 +306,12 @@
       try{localStorage.setItem("hint-ios","1");}catch(e){}
     });
   })();
+
+  $("btn-reset").addEventListener("click",function(){
+    if(!confirm("Azzerare il conteggio delle uscite e lo storico? Non si può annullare.")) return;
+    stato.uscite={}; stato.storico=[];
+    salva(); disegna();
+  });
 
   $("btn-prenota").addEventListener("click",prenota);
   $("btn-rientrato").addEventListener("click",rientrato);
