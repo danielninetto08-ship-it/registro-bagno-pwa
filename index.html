@@ -75,6 +75,15 @@
   #fine h2{font-size:clamp(2rem,9vw,3.2rem);margin:0}
   #fine p{font-size:1.25rem;margin:0;max-width:30ch}
   #fine button{background:var(--danger-fg);color:var(--danger);max-width:320px}
+  #login{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;
+    padding-block:24px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  #login .panel{width:100%;max-width:360px}
+  #login input{width:100%;font:inherit;font-size:1rem;padding:12px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--fg)}
+  #login input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  #ios-hint{border-color:var(--accent)}
+  #ios-hint p{margin:0}
+  #errore{min-height:1.3em;margin:8px 0 0;font-size:.9rem;color:var(--danger)}
 </style>
 </head>
 <body>
@@ -83,6 +92,12 @@
     <h1>Registro uscite al bagno</h1>
     <p class="sub">Prenota, esci, e hai 6 minuti.</p>
   </header>
+
+  <section class="panel" id="ios-hint" hidden>
+    <h2>Installa su iPhone / iPad</h2>
+    <p>In Safari tocca <b>Condividi</b> (il quadrato con la freccia in su), poi <b>Aggiungi a schermata Home</b>. Si aprirà come una vera app, anche senza internet.</p>
+    <button id="btn-hint" class="secondario" type="button">Ho capito</button>
+  </section>
 
   <section class="panel turno" aria-live="polite">
     <h2>In bagno ora</h2>
@@ -115,6 +130,16 @@
       <ul id="storico"></ul>
     </section>
   </div>
+</div>
+
+<div id="login">
+  <form class="panel" id="form-login" autocomplete="off">
+    <h2>Accesso</h2>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="off" required>
+    <button class="primario" type="submit">Entra</button>
+    <p id="errore" role="alert"></p>
+  </form>
 </div>
 
 <div id="fine" hidden>
@@ -256,6 +281,30 @@
     log(stato.attuale+" è rientrato/a");
     prossimo();
   }
+
+  $("form-login").addEventListener("submit",function(e){
+    e.preventDefault();
+    if($("pw").value==="4AIadmin"){
+      $("login").hidden=true; $("pw").value=""; $("errore").textContent="";
+      sbloccaAudio(); tieniSchermoAcceso();
+    } else {
+      $("errore").textContent="Password errata."; $("pw").select();
+    }
+  });
+  $("pw").focus();
+
+  (function(){
+    try{
+      var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+      var installata=navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+      var chiuso=localStorage.getItem("hint-ios")==="1";
+      if(ios&&!installata&&!chiuso) $("ios-hint").hidden=false;
+    }catch(e){}
+    $("btn-hint").addEventListener("click",function(){
+      $("ios-hint").hidden=true;
+      try{localStorage.setItem("hint-ios","1");}catch(e){}
+    });
+  })();
 
   $("btn-prenota").addEventListener("click",prenota);
   $("btn-rientrato").addEventListener("click",rientrato);
