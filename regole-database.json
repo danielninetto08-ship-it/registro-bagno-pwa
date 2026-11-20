@@ -1,0 +1,10 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "reg_dab39d1f51abfbe28590": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
