@@ -1,9 +1,22 @@
-REGISTRO BAGNO - app installabile (PWA)
+REGISTRO BAGNO - app installabile (PWA) con dati condivisi in tempo reale
 
-1. Carica questa cartella su un hosting gratuito (es. Netlify Drop, GitHub Pages, Cloudflare Pages).
+1. Carica TUTTA questa cartella su un hosting gratuito (Netlify Drop, GitHub Pages, Cloudflare Pages).
+   Se avevi gia' pubblicato la versione precedente, ricarica i file: gli aggiornamenti arrivano da soli.
 2. Apri l'indirizzo che ottieni, poi installa:
    - iPhone/iPad (Safari): Condividi > Aggiungi a schermata Home
    - Android (Chrome): menu > Installa app
    - Windows/Mac/Linux (Chrome o Edge): icona "Installa" nella barra dell'indirizzo
    - Mac (Safari): File > Aggiungi al Dock
-3. Dopo la prima apertura funziona anche senza internet.
+3. Password d'accesso: invariata.
+
+DATI CONDIVISI (tutti vedono la stessa cosa, professori compresi)
+Serve un database online gratuito (Firebase Realtime Database):
+ a. Vai su console.firebase.google.com, "Crea un progetto" (Analytics non serve).
+ b. Menu "Build" > "Realtime Database" > "Crea database". Scegli la regione Europa (europe-west1)
+    e "Modalita' di test" (le regole le sostituisci subito dopo).
+ c. Nella scheda "Regole" incolla il contenuto di regole-database.json e premi "Pubblica".
+ d. In cima alla scheda "Dati" copia l'indirizzo del database
+    (es. https://nome-progetto-default-rtdb.europe-west1.firebasedatabase.app) e mandalo a chi mantiene l'app:
+    va inserito nell'app, che poi va ricaricata sull'hosting.
+Finche' l'indirizzo non e' inserito, l'app funziona solo in locale su ogni dispositivo
+e lo indica con un avviso in alto.
