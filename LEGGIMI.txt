@@ -3,11 +3,7 @@ REGISTRO BAGNO - registrazione con conferma via email
 1. Carica TUTTA la cartella sull'hosting (sostituisce i file precedenti).
 2. In Firebase > Realtime Database > scheda "Regole": cancella tutto, incolla regole-database.json, "Pubblica".
    (Le regole sono cambiate rispetto a prima: vanno incollate di nuovo.)
-3. Invio email di conferma (gratis, senza account):
-   - vai su web3forms.com, inserisci daniel.ninetto08@gmail.com, ricevi via email una "Access Key";
-   - apri index.html con un editor di testo, cerca  __MAIL_KEY__  e al suo posto incolla la chiave
-     (resta tra le virgolette), poi salva e ricarica index.html sull'hosting.
-   Oppure manda la chiave a Claude, che rigenera il file.
+3. Invio email: la chiave Web3Forms e' gia' inserita in index.html (campo mail).
 
 COME FUNZIONA
 - Gli utenti si registrano con nome, cognome e password. Le password non vengono salvate: resta solo un'impronta.
