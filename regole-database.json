@@ -10,6 +10,10 @@
       ".read": true,
       ".write": true
     },
+    "reg_dab39d1f51abfbe28590_accessi": {
+      ".read": true,
+      ".write": true
+    },
     "reg_dab39d1f51abfbe28590_utenti": {
       ".read": false,
       ".write": false,

@@ -1,18 +1,12 @@
 REGISTRO BAGNO
 
-AGGIORNAMENTO: le regole del database sono cambiate (nuovo blocco "_presenza").
+AGGIORNAMENTO: le regole del database sono cambiate (nuovi blocchi "_presenza" e "_accessi").
 In Firebase > Realtime Database > Regole: cancella tutto, incolla regole-database.json, "Pubblica".
 
 COME FUNZIONA
-- Registrazione con nome, cognome e password. Ti arriva un'email con tre link:
-    CONFERMA COME ALUNNO   -> puo' prenotare l'uscita
-    CONFERMA COME DOCENTE  -> puo' anche far uscire gli alunni dalla coda (tasto ✓) e toglierli (✕)
-    RIFIUTA                -> cancella la richiesta
-- Le prenotazioni restano in coda: l'alunno esce solo quando il docente preme ✓.
+- Registrazione con nome, cognome e password. Ti arriva un'email con due link: CONFERMA e RIFIUTA.
+- Le prenotazioni restano in coda: accanto a ogni nome c'e' ✓ (fa uscire) e ✕ (toglie dalla coda).
   Quando uno rientra (o scade il tempo e si conferma la nota) non parte nessuno in automatico.
-- "Collegati ora" mostra chi ha l'app aperta in questo momento.
+- "Collegati ora": chi ha l'app aperta in questo momento.
+- "Registro accessi": storico con orario di chi ha fatto l'accesso e di chi si e' scollegato ("Esci").
 - La chiave per le email (Web3Forms) e' gia' inserita in index.html.
-
-SE IL TUO ACCOUNT E' GIA' REGISTRATO COME ALUNNO E VUOI DIVENTARE DOCENTE
-Firebase > Realtime Database > Dati > ..._utenti > clicca il tuo nome > cancella il nodo (icona X),
-poi registrati di nuovo e usa il link "CONFERMA COME DOCENTE" della nuova email.

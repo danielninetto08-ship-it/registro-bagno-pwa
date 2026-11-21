@@ -102,6 +102,7 @@
   button.piccolo{min-width:36px}
   #coda-nota{margin:10px 0 0;font-size:.85rem}
   #online li::marker{color:var(--ok)}
+  #accessi{max-height:260px;overflow-y:auto;font-size:.9rem}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -186,6 +187,11 @@
     <section class="panel">
       <h2>Collegati ora <small id="n-online"></small></h2>
       <ul id="online"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Registro accessi</h2>
+      <ul id="accessi"></ul>
     </section>
 
     <section class="panel">
@@ -363,7 +369,6 @@ window.avviaApp=function(){
     s.fine=nowS()+DURATA*1000;
     log(s,nome+" è uscito/a"+(da?" (autorizzato da "+da+")":""));
   }
-  function eDocente(){return !!(window.UTENTE && UTENTE.ruolo==="docente");}
 
   function disegna(){
     var sel=$("scelta"), cur=sel.value;
@@ -380,19 +385,17 @@ window.avviaApp=function(){
       var n=stato.uscite[a]||0;
       return "<li>"+esc(a)+(n?" <small>("+n+(n===1?" uscita":" uscite")+")</small>":"")+"</li>";
     }).join("");
-    var prof=eDocente();
-    var io=window.UTENTE?(UTENTE.cognome+" "+UTENTE.nome).toLowerCase():"";
     $("coda").innerHTML=stato.coda.length
       ? stato.coda.map(function(a){
           var b="";
-          if(prof) b+='<button class="conf" type="button" data-ok="'+esc(a)+'" aria-label="Conferma uscita di '+esc(a)+'"'+(stato.attuale?' disabled title="Aspetta che rientri chi è fuori"':'')+'>✓</button>';
-          if(prof || a.toLowerCase()===io) b+='<button class="piccolo" type="button" data-n="'+esc(a)+'" aria-label="Togli '+esc(a)+' dalla coda">✕</button>';
+          b+='<button class="conf" type="button" data-ok="'+esc(a)+'" aria-label="Conferma uscita di '+esc(a)+'"'+(stato.attuale?' disabled title="Aspetta che rientri chi è fuori"':'')+'>✓</button>';
+          b+='<button class="piccolo" type="button" data-n="'+esc(a)+'" aria-label="Togli '+esc(a)+' dalla coda">✕</button>';
           return '<li class="riga"><span>'+esc(a)+'</span><span class="azioni">'+b+'</span></li>';
         }).join("")
       : '<li class="vuota">Nessuna prenotazione</li>';
-    $("coda-nota").textContent=!stato.coda.length ? "" : prof
-      ? (stato.attuale ? "✓ si attiva quando rientra chi è fuori. ✕ toglie dalla coda." : "Premi ✓ per far uscire l'alunno, ✕ per toglierlo dalla coda.")
-      : "L'uscita deve essere confermata dal docente.";
+    $("coda-nota").textContent=!stato.coda.length ? "" : (stato.attuale
+      ? "✓ si attiva quando rientra chi è fuori. ✕ toglie dalla coda."
+      : "Premi ✓ per far uscire l'alunno, ✕ per toglierlo dalla coda.");
     $("storico").innerHTML=stato.storico.length
       ? stato.storico.map(function(e){return "<li>"+(e.t?quando(e.t)+" - ":"")+esc(e.m)+"</li>";}).join("")
       : '<li class="vuota">Ancora nessuna uscita</li>';
@@ -400,7 +403,7 @@ window.avviaApp=function(){
     chi.textContent=stato.attuale||"nessuno";
     chi.className="chi"+(stato.attuale?"":" vuoto");
     $("inizio").textContent=(stato.attuale&&stato.fine)?"Uscito/a alle "+hms(stato.fine-DURATA*1000)
-      :(stato.coda.length?"Prossimo in coda: "+stato.coda[0]+" (attende il via libera del docente)":"");
+      :(stato.coda.length?"Prossimo in coda: "+stato.coda[0]+" (attende il via libera ✓)":"");
     $("btn-rientrato").hidden=!stato.attuale;
 
     /* Schermata "tempo scaduto": guidata dallo stato condiviso, quindi la vedono tutti
@@ -504,8 +507,7 @@ window.avviaApp=function(){
   $("btn-rientrato").addEventListener("click",rientrato);
   $("btn-ok").addEventListener("click",chiudi);
   function conferma(nome){
-    if(!eDocente()) return;
-    var da=UTENTE.cognome+" "+UTENTE.nome;
+    var da=window.UTENTE?UTENTE.cognome+" "+UTENTE.nome:"";
     mutate(function(s){
       if(s.attuale) return "Qualcuno è già in bagno: aspetta che rientri.";
       var i=s.coda.indexOf(nome);
@@ -536,19 +538,19 @@ window.avviaApp=function(){
     var lim=nowS()-90000, v=[];
     Object.keys(inLinea).forEach(function(k){
       var x=inLinea[k];
-      if(x && x.n && (+x.t||0)>=lim) v.push({n:String(x.n),r:x.r});
+      if(x && x.n && (+x.t||0)>=lim) v.push({n:String(x.n)});
     });
     v.sort(function(a,b){return a.n.localeCompare(b.n,"it");});
     var io=window.UTENTE?(UTENTE.cognome+" "+UTENTE.nome):"";
     $("n-online").textContent="("+v.length+")";
     $("online").innerHTML=v.length
-      ? v.map(function(x){return "<li>"+esc(x.n)+(x.n===io?" <small>(tu)</small>":"")+(x.r==="docente"?" <small>docente</small>":"")+"</li>";}).join("")
+      ? v.map(function(x){return "<li>"+esc(x.n)+(x.n===io?" <small>(tu)</small>":"")+"</li>";}).join("")
       : '<li class="vuota">Nessuno</li>';
   }
   if(ref && window.UTENTE){
     var pres=window.DB.ref(CFG.path+"_presenza"), mia=pres.child(UTENTE.id);
     var segna=function(){
-      try{mia.set({n:UTENTE.cognome+" "+UTENTE.nome, r:UTENTE.ruolo||"alunno", t:nowS()});}catch(e){}
+      try{mia.set({n:UTENTE.cognome+" "+UTENTE.nome, t:nowS()});}catch(e){}
     };
     window.__segna=function(){ if(online) segna(); };
     window.__presenzaOff=function(){ try{mia.remove();}catch(e){} };
@@ -560,6 +562,35 @@ window.avviaApp=function(){
     setInterval(disegnaOnline,15000);
   }else{
     $("online").innerHTML='<li class="vuota">Non disponibile</li>';
+  }
+
+  /* Registro accessi: chi ha fatto l'accesso e chi si e' scollegato, con l'orario */
+  var rAcc=(CONFIGURATO && window.DB) ? window.DB.ref(CFG.path+"_accessi") : null;
+  var accessi=[];
+  function disegnaAccessi(){
+    $("accessi").innerHTML=accessi.length
+      ? accessi.map(function(e){return "<li>"+(e.t?quando(e.t)+" - ":"")+esc(e.m)+"</li>";}).join("")
+      : '<li class="vuota">Ancora nessun accesso</li>';
+  }
+  function logAccesso(testo,fine){
+    if(!rAcc){ if(fine) fine(); return; }
+    try{
+      rAcc.transaction(function(cur){
+        var a=lista(cur); a.unshift({t:nowS(),m:testo}); return a.slice(0,300);
+      },function(){ if(fine) fine(); },false);
+    }catch(e){ if(fine) fine(); }
+  }
+  if(rAcc){
+    rAcc.on("value",function(s){
+      accessi=lista(s.val()).map(function(e){return {t:+e.t||0,m:String(e.m||"")};});
+      disegnaAccessi();
+    });
+    if(window.UTENTE) logAccesso(UTENTE.cognome+" "+UTENTE.nome+" ha fatto l'accesso");
+    window.__logUscita=function(fine){
+      if(window.UTENTE) logAccesso(UTENTE.cognome+" "+UTENTE.nome+" si è scollegato/a",fine); else if(fine) fine();
+    };
+  }else{
+    $("accessi").innerHTML='<li class="vuota">Non disponibile</li>';
   }
 
   setInterval(aggiornaTimer,500);
@@ -611,18 +642,21 @@ window.avviaApp=function(){
 
   function entra(u){
     window.UTENTE=u;
-    $("utente").textContent="Connesso come "+u.cognome+" "+u.nome+(u.ruolo==="docente"?" (docente)":"");
+    $("utente").textContent="Connesso come "+u.cognome+" "+u.nome;
     mostra("app");
     window.avviaApp();
   }
   function esci(){
     try{localStorage.removeItem("bagno-sessione");}catch(e){}
+    var fatto=false;
+    function vai(){ if(fatto) return; fatto=true; location.replace(location.pathname); }
     try{if(window.__presenzaOff) window.__presenzaOff();}catch(e){}
-    setTimeout(function(){location.replace(location.pathname);},400);
+    try{ if(window.__logUscita) window.__logUscita(vai); else vai(); }catch(e){ vai(); }
+    setTimeout(vai,2000);
   }
   $("btn-esci").addEventListener("click",esci);
 
-  async function inviaMail(u,link,docente,rifiuta){
+  async function inviaMail(u,link,rifiuta){
     var r=await conTimeout(fetch("https://api.web3forms.com/submit",{
       method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
       body:JSON.stringify({
@@ -631,9 +665,8 @@ window.avviaApp=function(){
         from_name:"Registro Bagno",
         message:"Nuova richiesta di registrazione al Registro Bagno.\n\nCognome: "+u.cognome+"\nNome: "+u.nome+
           "\nData: "+new Date().toLocaleString("it-IT")+
-          "\n\nCONFERMA COME ALUNNO (può prenotare le uscite):\n"+link+
-          "\n\nCONFERMA COME DOCENTE (può anche far uscire gli alunni dalla coda):\n"+docente+
-          "\n\nRIFIUTA (cancella la richiesta):\n"+rifiuta+
+          "\n\nPER CONFERMARE la registrazione apri questo link:\n"+link+
+          "\n\nPER RIFIUTARE (cancella la richiesta):\n"+rifiuta+
           "\n\nSe non conosci questa persona, ignora questa email: senza la tua conferma non potrà entrare."
       })
     }),20000);
@@ -661,7 +694,7 @@ window.avviaApp=function(){
       if(!es.ok){ msg("Esiste già un account con questo nome: usa «Accedi»."); go.disabled=false; return; }
       scritto=true;
       var pagina=location.origin+location.pathname;
-      await inviaMail({nome:nome,cognome:cognome},pagina+"?approva="+id+"."+token,pagina+"?docente="+id+"."+token,pagina+"?rifiuta="+id+"."+token);
+      await inviaMail({nome:nome,cognome:cognome},pagina+"?approva="+id+"."+token,pagina+"?rifiuta="+id+"."+token);
       $("r-pw").value=""; $("r-pw2").value="";
       msg("Registrazione inviata. Sarà attiva dopo la conferma via email: quando l'avrai ricevuta, accedi da «Accedi».",true);
     }catch(err){
@@ -684,7 +717,7 @@ window.avviaApp=function(){
       if(!okpw) msg("Nome, cognome o password errati.");
       else if(rec.stato!=="approvato") msg("La tua registrazione non è ancora stata confermata. Riprova più tardi.");
       else{
-        var u={id:id,nome:rec.nome,cognome:rec.cognome,ruolo:rec.ruolo||"alunno"};
+        var u={id:id,nome:rec.nome,cognome:rec.cognome};
         try{localStorage.setItem("bagno-sessione",JSON.stringify(u));}catch(x){}
         entra(u); return;
       }
@@ -705,16 +738,15 @@ window.avviaApp=function(){
       if(!t||await sha256(t)!==rec.th) return dir("Link non valido.");
       var nome=rec.cognome+" "+rec.nome;
       if(modo==="rifiuta"){ await ref.remove(); return dir("Registrazione di "+nome+" rifiutata e cancellata.",true); }
-      var doc=(modo==="docente");
-      if(rec.stato==="approvato" && (!doc || rec.ruolo==="docente")) return dir("La registrazione di "+nome+" era già stata confermata.",true);
-      var es=await transazione(ref,function(cur){ if(cur===null) return null; if(cur.th!==rec.th) return; cur.stato="approvato"; if(doc) cur.ruolo="docente"; return cur; });
-      dir(es.ok?"Registrazione di "+nome+" confermata come "+(doc?"DOCENTE":"alunno")+". Ora può accedere.":"Non è stato possibile confermare, riprova.",es.ok);
+      if(rec.stato==="approvato") return dir("La registrazione di "+nome+" era già stata confermata.",true);
+      var es=await transazione(ref,function(cur){ if(cur===null) return null; if(cur.th!==rec.th) return; cur.stato="approvato"; return cur; });
+      dir(es.ok?"Registrazione di "+nome+" confermata. Ora può accedere.":"Non è stato possibile confermare, riprova.",es.ok);
     }catch(err){ dir("Non è stato possibile completare ("+(err&&err.message==="timeout"?"connessione assente o lenta":(err&&err.message)||"errore")+"): riapri il link tra poco."); }
   }
 
   var qs=location.search, mm;
   try{qs=decodeURIComponent(location.search);}catch(e){}
-  if((mm=qs.match(/[?&;](approva|docente|rifiuta)=([a-z0-9_]+)\.([a-f0-9]+)/))){ gestisciLink(mm[2],mm[3],mm[1]); return; }
+  if((mm=qs.match(/[?&;](approva|rifiuta)=([a-z0-9_]+)\.([a-f0-9]+)/))){ gestisciLink(mm[2],mm[3],mm[1]); return; }
   if((mm=qs.match(/[?&;]approva=([a-z0-9_]+)/))){ /* vecchio formato dei link */
     var tt=qs.match(/[?&;](?:amp;)?t=([a-f0-9]+)/);
     gestisciLink(mm[1],tt?tt[1]:"",/[?&;](?:amp;)?r=1/.test(qs)?"rifiuta":"approva"); return;
@@ -724,14 +756,7 @@ window.avviaApp=function(){
   if(sess&&sess.id){
     entra(sess);
     if(CONFIGURATO&&DB){ /* se l'account e' stato revocato, esce */
-      leggi(rUtente(sess.id)).then(function(rec){
-        if(!rec||rec.stato!=="approvato") esci();
-        else if((rec.ruolo||"alunno")!==(sess.ruolo||"alunno")){
-          sess.ruolo=rec.ruolo||"alunno";
-          try{localStorage.setItem("bagno-sessione",JSON.stringify(sess));}catch(e){}
-          location.reload();
-        }
-      }).catch(function(){});
+      leggi(rUtente(sess.id)).then(function(rec){ if(!rec||rec.stato!=="approvato") esci(); }).catch(function(){});
     }
   }else mostra("auth");
   if(!CONFIGURATO) msg("Servizio online non configurato.");
