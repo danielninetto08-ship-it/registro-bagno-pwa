@@ -1,22 +1,16 @@
-REGISTRO BAGNO - app installabile (PWA) con dati condivisi in tempo reale
+REGISTRO BAGNO - registrazione con conferma via email
 
-1. Carica TUTTA questa cartella su un hosting gratuito (Netlify Drop, GitHub Pages, Cloudflare Pages).
-   Se avevi gia' pubblicato la versione precedente, ricarica i file: gli aggiornamenti arrivano da soli.
-2. Apri l'indirizzo che ottieni, poi installa:
-   - iPhone/iPad (Safari): Condividi > Aggiungi a schermata Home
-   - Android (Chrome): menu > Installa app
-   - Windows/Mac/Linux (Chrome o Edge): icona "Installa" nella barra dell'indirizzo
-   - Mac (Safari): File > Aggiungi al Dock
-3. Password d'accesso: invariata.
+1. Carica TUTTA la cartella sull'hosting (sostituisce i file precedenti).
+2. In Firebase > Realtime Database > scheda "Regole": cancella tutto, incolla regole-database.json, "Pubblica".
+   (Le regole sono cambiate rispetto a prima: vanno incollate di nuovo.)
+3. Invio email di conferma (gratis, senza account):
+   - vai su web3forms.com, inserisci daniel.ninetto08@gmail.com, ricevi via email una "Access Key";
+   - apri index.html con un editor di testo, cerca  __MAIL_KEY__  e al suo posto incolla la chiave
+     (resta tra le virgolette), poi salva e ricarica index.html sull'hosting.
+   Oppure manda la chiave a Claude, che rigenera il file.
 
-DATI CONDIVISI (tutti vedono la stessa cosa, professori compresi)
-Serve un database online gratuito (Firebase Realtime Database):
- a. Vai su console.firebase.google.com, "Crea un progetto" (Analytics non serve).
- b. Menu "Build" > "Realtime Database" > "Crea database". Scegli la regione Europa (europe-west1)
-    e "Modalita' di test" (le regole le sostituisci subito dopo).
- c. Nella scheda "Regole" incolla il contenuto di regole-database.json e premi "Pubblica".
- d. In cima alla scheda "Dati" copia l'indirizzo del database
-    (es. https://nome-progetto-default-rtdb.europe-west1.firebasedatabase.app) e mandalo a chi mantiene l'app:
-    va inserito nell'app, che poi va ricaricata sull'hosting.
-Finche' l'indirizzo non e' inserito, l'app funziona solo in locale su ogni dispositivo
-e lo indica con un avviso in alto.
+COME FUNZIONA
+- Gli utenti si registrano con nome, cognome e password. Le password non vengono salvate: resta solo un'impronta.
+- Ti arriva un'email con due link: CONFERMA o RIFIUTA. Finche' non clicchi conferma, la persona non puo' entrare.
+- Dopo la conferma entra da "Accedi" e resta collegata sul dispositivo finche' non preme "Esci".
+- I link funzionano da qualunque dispositivo, senza accedere.
