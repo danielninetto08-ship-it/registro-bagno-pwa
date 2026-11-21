@@ -8,6 +8,6 @@ COME FUNZIONA
 - Le prenotazioni restano in coda: accanto a ogni nome c'e' ✓ (fa uscire) e ✕ (toglie dalla coda).
   Quando uno rientra (o scade il tempo e si conferma la nota) non parte nessuno in automatico.
 - "Collegati ora": chi ha l'app aperta in questo momento.
-- "Registro accessi": storico con orario di chi ha fatto l'accesso e di chi si e' scollegato ("Esci").
+- "Registro accessi": storico con orario di chi ha fatto l'accesso e di chi si e' scollegato ("Esci"); il tasto sotto lo azzera per tutti.
 - La chiave per le email (Web3Forms) e' gia' inserita in index.html.
 - Se un elenco mostra "controlla le regole di Firebase", le regole non sono state pubblicate.

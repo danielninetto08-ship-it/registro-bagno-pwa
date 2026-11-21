@@ -192,6 +192,7 @@
     <section class="panel">
       <h2>Registro accessi</h2>
       <ul id="accessi"></ul>
+      <button id="btn-reset-accessi" class="secondario" type="button">Azzera registro accessi</button>
     </section>
 
     <section class="panel">
@@ -589,6 +590,15 @@ window.avviaApp=function(){
       },false);
     }catch(e){ if(fine) fine(); }
   }
+  $("btn-reset-accessi").addEventListener("click",function(){
+    if(!rAcc) return;
+    if(!confirm("Azzerare il registro accessi per TUTTI i dispositivi? Non si può annullare.")) return;
+    try{
+      rAcc.transaction(function(){ return null; },function(err){
+        if(err) $("accessi").innerHTML='<li class="vuota">Impossibile azzerare: controlla le regole di Firebase.</li>';
+      },false);
+    }catch(e){}
+  });
   if(rAcc){
     rAcc.on("value",function(s){
       accessi=lista(s.val()).map(function(e){return {t:+e.t||0,m:String(e.m||"")};});
