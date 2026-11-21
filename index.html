@@ -533,8 +533,9 @@ window.avviaApp=function(){
 
   /* Chi e' collegato: ogni utente scrive la propria presenza, che sparisce da sola
      quando chiude l'app (onDisconnect) o smette di dare segni di vita per 90 secondi */
-  var inLinea={};
+  var inLinea={}, erroreOnline="";
   function disegnaOnline(){
+    if(erroreOnline){ $("n-online").textContent=""; $("online").innerHTML='<li class="vuota">'+esc(erroreOnline)+'</li>'; return; }
     var lim=nowS()-90000, v=[];
     Object.keys(inLinea).forEach(function(k){
       var x=inLinea[k];
@@ -548,9 +549,12 @@ window.avviaApp=function(){
       : '<li class="vuota">Nessuno</li>';
   }
   if(ref && window.UTENTE){
-    var pres=window.DB.ref(CFG.path+"_presenza"), mia=pres.child(UTENTE.id);
+    var pres=window.DB.ref(CFG.path+"_utenti/_presenza"), mia=pres.child(UTENTE.id);
     var segna=function(){
-      try{mia.set({n:UTENTE.cognome+" "+UTENTE.nome, t:nowS()});}catch(e){}
+      try{
+        var pr=mia.set({n:UTENTE.cognome+" "+UTENTE.nome, t:nowS()});
+        if(pr && pr.catch) pr.catch(function(){ erroreOnline="Impossibile scrivere nel database: controlla le regole di Firebase."; disegnaOnline(); });
+      }catch(e){}
     };
     window.__segna=function(){ if(online) segna(); };
     window.__presenzaOff=function(){ try{mia.remove();}catch(e){} };
@@ -558,14 +562,16 @@ window.avviaApp=function(){
       if(s.val()===true){ try{mia.onDisconnect().remove();}catch(e){} segna(); }
     });
     setInterval(window.__segna,25000);
-    pres.on("value",function(s){ inLinea=s.val()||{}; disegnaOnline(); });
+    pres.on("value",function(s){ inLinea=s.val()||{}; disegnaOnline(); },function(){
+      erroreOnline="Accesso negato al database: controlla le regole di Firebase."; disegnaOnline();
+    });
     setInterval(disegnaOnline,15000);
   }else{
     $("online").innerHTML='<li class="vuota">Non disponibile</li>';
   }
 
   /* Registro accessi: chi ha fatto l'accesso e chi si e' scollegato, con l'orario */
-  var rAcc=(CONFIGURATO && window.DB) ? window.DB.ref(CFG.path+"_accessi") : null;
+  var rAcc=(CONFIGURATO && window.DB) ? window.DB.ref(CFG.path+"_utenti/_accessi") : null;
   var accessi=[];
   function disegnaAccessi(){
     $("accessi").innerHTML=accessi.length
@@ -577,13 +583,18 @@ window.avviaApp=function(){
     try{
       rAcc.transaction(function(cur){
         var a=lista(cur); a.unshift({t:nowS(),m:testo}); return a.slice(0,300);
-      },function(){ if(fine) fine(); },false);
+      },function(err){
+        if(err) $("accessi").innerHTML='<li class="vuota">Impossibile scrivere nel registro: controlla le regole di Firebase.</li>';
+        if(fine) fine();
+      },false);
     }catch(e){ if(fine) fine(); }
   }
   if(rAcc){
     rAcc.on("value",function(s){
       accessi=lista(s.val()).map(function(e){return {t:+e.t||0,m:String(e.m||"")};});
       disegnaAccessi();
+    },function(){
+      $("accessi").innerHTML='<li class="vuota">Accesso negato al database: controlla le regole di Firebase.</li>';
     });
     if(window.UTENTE) logAccesso(UTENTE.cognome+" "+UTENTE.nome+" ha fatto l'accesso");
     window.__logUscita=function(fine){
