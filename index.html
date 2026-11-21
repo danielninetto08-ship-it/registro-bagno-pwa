@@ -587,8 +587,8 @@ window.avviaApp=function(){
       var es=await transazione(ref,function(cur){ if(cur&&cur.stato==="approvato") return; return rec; });
       if(!es.ok){ msg("Esiste già un account con questo nome: usa «Accedi»."); go.disabled=false; return; }
       scritto=true;
-      var base=location.origin+location.pathname+"?approva="+encodeURIComponent(id)+"&t="+token;
-      await inviaMail({nome:nome,cognome:cognome},base,base+"&r=1");
+      var pagina=location.origin+location.pathname;
+      await inviaMail({nome:nome,cognome:cognome},pagina+"?approva="+id+"."+token,pagina+"?rifiuta="+id+"."+token);
       $("r-pw").value=""; $("r-pw2").value="";
       msg("Registrazione inviata. Sarà attiva dopo la conferma via email: quando l'avrai ricevuta, accedi da «Accedi».",true);
     }catch(err){
@@ -633,13 +633,18 @@ window.avviaApp=function(){
       var nome=rec.cognome+" "+rec.nome;
       if(rifiuta){ await ref.remove(); return dir("Registrazione di "+nome+" rifiutata e cancellata.",true); }
       if(rec.stato==="approvato") return dir("La registrazione di "+nome+" era già stata confermata.",true);
-      var es=await transazione(ref,function(cur){ if(!cur||cur.th!==rec.th) return; cur.stato="approvato"; return cur; });
+      var es=await transazione(ref,function(cur){ if(cur===null) return null; if(cur.th!==rec.th) return; cur.stato="approvato"; return cur; });
       dir(es.ok?"Registrazione di "+nome+" confermata. Ora può accedere.":"Non è stato possibile confermare, riprova.",es.ok);
-    }catch(err){ dir("Connessione assente o lenta: riapri il link tra poco."); }
+    }catch(err){ dir("Non è stato possibile completare ("+(err&&err.message==="timeout"?"connessione assente o lenta":(err&&err.message)||"errore")+"): riapri il link tra poco."); }
   }
 
-  var q=new URLSearchParams(location.search);
-  if(q.get("approva")){ gestisciLink(q.get("approva"),q.get("t")||"",q.get("r")==="1"); return; }
+  var qs=location.search, mm;
+  try{qs=decodeURIComponent(location.search);}catch(e){}
+  if((mm=qs.match(/[?&;](approva|rifiuta)=([a-z0-9_]+)\.([a-f0-9]+)/))){ gestisciLink(mm[2],mm[3],mm[1]==="rifiuta"); return; }
+  if((mm=qs.match(/[?&;]approva=([a-z0-9_]+)/))){ /* vecchio formato dei link */
+    var tt=qs.match(/[?&;](?:amp;)?t=([a-f0-9]+)/);
+    gestisciLink(mm[1],tt?tt[1]:"",/[?&;](?:amp;)?r=1/.test(qs)); return;
+  }
   var sess=null;
   try{sess=JSON.parse(localStorage.getItem("bagno-sessione")||"null");}catch(e){}
   if(sess&&sess.id){
