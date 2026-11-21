@@ -6,6 +6,10 @@
       ".read": true,
       ".write": true
     },
+    "reg_dab39d1f51abfbe28590_presenza": {
+      ".read": true,
+      ".write": true
+    },
     "reg_dab39d1f51abfbe28590_utenti": {
       ".read": false,
       ".write": false,

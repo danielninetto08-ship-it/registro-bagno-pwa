@@ -1,12 +1,18 @@
-REGISTRO BAGNO - registrazione con conferma via email
+REGISTRO BAGNO
 
-1. Carica TUTTA la cartella sull'hosting (sostituisce i file precedenti).
-2. In Firebase > Realtime Database > scheda "Regole": cancella tutto, incolla regole-database.json, "Pubblica".
-   (Le regole sono cambiate rispetto a prima: vanno incollate di nuovo.)
-3. Invio email: la chiave Web3Forms e' gia' inserita in index.html (campo mail).
+AGGIORNAMENTO: le regole del database sono cambiate (nuovo blocco "_presenza").
+In Firebase > Realtime Database > Regole: cancella tutto, incolla regole-database.json, "Pubblica".
 
 COME FUNZIONA
-- Gli utenti si registrano con nome, cognome e password. Le password non vengono salvate: resta solo un'impronta.
-- Ti arriva un'email con due link: CONFERMA o RIFIUTA. Finche' non clicchi conferma, la persona non puo' entrare.
-- Dopo la conferma entra da "Accedi" e resta collegata sul dispositivo finche' non preme "Esci".
-- I link funzionano da qualunque dispositivo, senza accedere.
+- Registrazione con nome, cognome e password. Ti arriva un'email con tre link:
+    CONFERMA COME ALUNNO   -> puo' prenotare l'uscita
+    CONFERMA COME DOCENTE  -> puo' anche far uscire gli alunni dalla coda (tasto ✓) e toglierli (✕)
+    RIFIUTA                -> cancella la richiesta
+- Le prenotazioni restano in coda: l'alunno esce solo quando il docente preme ✓.
+  Quando uno rientra (o scade il tempo e si conferma la nota) non parte nessuno in automatico.
+- "Collegati ora" mostra chi ha l'app aperta in questo momento.
+- La chiave per le email (Web3Forms) e' gia' inserita in index.html.
+
+SE IL TUO ACCOUNT E' GIA' REGISTRATO COME ALUNNO E VUOI DIVENTARE DOCENTE
+Firebase > Realtime Database > Dati > ..._utenti > clicca il tuo nome > cancella il nodo (icona X),
+poi registrati di nuovo e usa il link "CONFERMA COME DOCENTE" della nuova email.
